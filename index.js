@@ -3,16 +3,28 @@ var graphqlHTTP = require('express-graphql')
 var { buildSchema } = require('graphql')
 var cors = require('cors')
 
-const data = [{id:'1', text:'ddd'}]
+const data = [{ id: '1', author: 'gandalf', text: 'ddd' }]
 // Construct a schema, using GraphQL schema language
+
+
 var schema = buildSchema(`
-  scalar Item {
-    id: String
+  input PostInput {
+    author: String
     text: String
   }
+
+  scalar Post {
+    id: String
+    author: String
+    text: String
+  }
+  
   type Query {
-    getData: [Item]
-    addItem(text: String): String
+    getData: [Post]
+  }
+   
+  type Mutation {
+    addItem(input: PostInput): String
   }
 `)
 
@@ -20,11 +32,15 @@ var schema = buildSchema(`
 // The root provides a resolver function for each API endpoint
 var root = {
   getData: () => {
-    console.log(data)
+    // console.log(data)
     return data
   },
-  addItem: ({text}) => {
-    data.push({id: data.length.toString(), text})
+  addItem: (post) => {
+    console.log("post", post);
+
+    data.push({ ...post, id: data.length.toString() })
+    console.log("data", data);
+
     return 'Done'
   }
 }
