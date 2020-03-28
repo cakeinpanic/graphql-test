@@ -1,6 +1,7 @@
 var express = require('express')
 var graphqlHTTP = require('express-graphql')
 var { buildSchema } = require('graphql')
+var cors = require('cors')
 
 const data = [{id:'1', text:'ddd'}]
 // Construct a schema, using GraphQL schema language
@@ -29,6 +30,10 @@ var root = {
 }
 
 var app = express()
+
+app.use(cors({
+  origin: '*'
+}))
 app.use('/graphql', graphqlHTTP({
   schema: schema,
   rootValue: root,
