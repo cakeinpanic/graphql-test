@@ -38,7 +38,7 @@ var root = {
   addItem: (post) => {
     console.log("post", post);
 
-    data.push({ ...post, id: data.length.toString() })
+    data.push({ ...post.input, id: data.length.toString() })
     console.log("data", data);
 
     return 'Done'
