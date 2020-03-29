@@ -50,11 +50,11 @@ var root = {
     console.log("payload@@@@", payload);
 
     const postId = posts.findIndex(post => payload.id === post.id);
-    const newPost = { ...payload.input, id: postId };
+    const newPost = { ...payload.input, id: postId.toString() };
     posts[postId] = newPost;
     // console.log("posts", posts);
 
-    return newPost;
+    return newPost; 
   }
 }
 
