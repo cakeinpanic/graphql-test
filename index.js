@@ -3,9 +3,8 @@ var graphqlHTTP = require('express-graphql')
 var { buildSchema } = require('graphql')
 var cors = require('cors')
 
-const data = [{ id: '1', author: 'gandalf', text: 'ddd' }]
+const posts = []
 // Construct a schema, using GraphQL schema language
-
 
 var schema = buildSchema(`
   input PostInput {
@@ -14,34 +13,48 @@ var schema = buildSchema(`
   }
 
   scalar Post {
-    id: String
+    id: String 
     author: String
     text: String
   }
   
   type Query {
-    getData: [Post]
+    getPosts: [Post]
   }
    
   type Mutation {
-    addItem(input: PostInput): String
+    addPost(input: PostInput): Post
+    editPost(id:String , input: PostInput): Post
   }
 `)
 
 
 // The root provides a resolver function for each API endpoint
 var root = {
-  getData: () => {
-    // console.log(data)
-    return data
+  getPosts: () => {
+    console.log(posts);
+
+    return posts
   },
-  addItem: (post) => {
-    console.log("post", post);
 
-    data.push({ ...post.input, id: data.length.toString() })
-    console.log("data", data);
+  addPost: (payload) => {
 
-    return 'Done'
+    const newPost = { id: posts.length.toString(), ...payload.input };
+    posts.push(newPost);
+    console.log("posts", posts);
+
+    return newPost;
+  },
+
+  editPost: (payload) => {
+    console.log("payload@@@@", payload);
+
+    const postId = posts.findIndex(post => payload.id === post.id);
+    const newPost = { ...payload.input, id: postId };
+    posts[postId] = newPost;
+    // console.log("posts", posts);
+
+    return newPost;
   }
 }
 
@@ -50,6 +63,7 @@ var app = express()
 app.use(cors({
   origin: '*'
 }))
+
 app.use('/graphql', graphqlHTTP({
   schema: schema,
   rootValue: root,
