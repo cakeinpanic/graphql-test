@@ -1,12 +1,13 @@
-var express = require('express')
-var graphqlHTTP = require('express-graphql')
-var { buildSchema } = require('graphql')
-var cors = require('cors')
+const express = require('express')
+const graphqlHTTP = require('express-graphql')
+const { buildSchema } = require('graphql')
+const cors = require('cors')
 
-const posts = []
+let uniqueId = 0;
+let posts = []
 // Construct a schema, using GraphQL schema language
 
-var schema = buildSchema(`
+const schema = buildSchema(`
   input PostInput {
     author: String
     text: String
@@ -25,12 +26,13 @@ var schema = buildSchema(`
   type Mutation {
     addPost(input: PostInput): Post
     editPost(id:String , input: PostInput): Post
+    deletePost(id:String): String
   }
 `)
 
 
 // The root provides a resolver function for each API endpoint
-var root = {
+const root = {
   getPosts: () => {
     console.log(posts);
 
@@ -39,7 +41,8 @@ var root = {
 
   addPost: (payload) => {
 
-    const newPost = { id: posts.length.toString(), ...payload.input };
+    const newPost = { id: uniqueId.toString(), ...payload.input };
+    uniqueId++;
     posts.push(newPost);
     console.log("posts", posts);
 
@@ -47,18 +50,25 @@ var root = {
   },
 
   editPost: (payload) => {
+
+    const postIndex = posts.findIndex(post => payload.id === post.id);
+    const newPost = { ...payload.input, id: payload.id };
+    posts[postIndex] = newPost;
+
+    return newPost;
+  },
+
+  deletePost: (payload) => {
     console.log("payload@@@@", payload);
 
-    const postId = posts.findIndex(post => payload.id === post.id);
-    const newPost = { ...payload.input, id: postId.toString() };
-    posts[postId] = newPost;
-    // console.log("posts", posts);
+    const postIndex = posts.findIndex(post => payload.id === post.id);
+    posts.splice(postIndex, 1);
 
-    return newPost; 
+    return payload.id;
   }
 }
 
-var app = express()
+const app = express()
 
 app.use(cors({
   origin: '*'
